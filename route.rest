@@ -1,0 +1,21 @@
+###
+POST http://localhost:4100/users
+Content-Type: application/json
+
+{
+    "name": "Alice",
+    "email": "TestanoTher@example.com"
+}
+
+
+###
+POST http://localhost:4100/notes
+Content-Type: application/json
+
+{
+    "title": "Will it work if there was no userid = 6 in users table",
+    "content": "I love nodeJS!",
+    "tags": ["personal", "draft"],
+    "is_pinned": true,
+    "user_id": 6
+}

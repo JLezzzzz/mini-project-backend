@@ -1,0 +1,108 @@
+###Get All users
+GET http://localhost:4100/mongo/users
+
+
+### Create a user (non-login)
+POST http://localhost:4100/mongo/users
+Content-Type: application/json
+
+{
+    "name": "TestUnique5",
+    "username":"TestUnique5",
+    "password": "TestUnique5",
+    "email": "TestUnique6"
+}
+
+###Delete 1 user
+DELETE http://localhost:4100/mongo/users
+Content-Type: application/json
+
+{
+    "name": "TestUnique5"
+}
+
+
+###Get All note
+GET http://localhost:4100/mongo/notes
+
+
+###Create a note
+POST http://localhost:4100/mongo/notes
+Content-Type: application/json
+
+{
+    "title": "Test Person",
+    "content": "testperson3@example.com",
+    "tags": ["nodejs", "notes"],
+    "isPinned": true,
+    "userId": "1"
+
+}
+
+### Register a new user
+POST http://localhost:4100/mongo/auth/register
+Content-Type: application/json
+
+{
+    "fullName": "Funny Guy",
+    "email": "funny.guy@gmail.com",
+    "password": "funny123"
+}
+
+### Login with the registered user
+POST http://localhost:4100/mongo/auth/login
+Content-Type: application/json
+
+{
+    "email": "funny.guy@gmail.com",
+    "password": "funny123"
+}
+
+### Add a new note (protected route)
+POST http://localhost:4100/mongo/add-note
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODE4ODdjZDUyNmE5NmNjZmM3NDQzNmUiLCJpYXQiOjE3NDY0NDYxMTIsImV4cCI6MTc0NjQ1MzMxMn0.1ScE1sR3okFjQdvP5Ng6oUuo14OCCwzKd6H-2sbpVv4
+
+{
+    "title": "Funny's note 3",
+    "content": "This is a Funny's note",
+    "tags": ["important", "fitness"]
+}
+
+### Get all notes
+GET http://localhost:4100/mongo/get-all-notes
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODE4ODdjZDUyNmE5NmNjZmM3NDQzNmUiLCJpYXQiOjE3NDY0NDYxMTIsImV4cCI6MTc0NjQ1MzMxMn0.1ScE1sR3okFjQdvP5Ng6oUuo14OCCwzKd6H-2sbpVv4
+
+### Search
+GET http://localhost:4100/mongo/search-notes?query=funny
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODE4ODdjZDUyNmE5NmNjZmM3NDQzNmUiLCJpYXQiOjE3NDY0NDIyNzQsImV4cCI6MTc0NjQ0NTg3NH0.PqxciVjUeNw7EPvmPdXvlLnTARsWzXeAAVsNiOYA3xI
+
+### Delete a note
+DELETE http://localhost:4100/mongo/delete-note/6818a371c242e5dec34c6cb3
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODE4ODdjZDUyNmE5NmNjZmM3NDQzNmUiLCJpYXQiOjE3NDY0NDIyNzQsImV4cCI6MTc0NjQ0NTg3NH0.PqxciVjUeNw7EPvmPdXvlLnTARsWzXeAAVsNiOYA3xI
+
+
+### Edit a note
+PUT http://localhost:4100/mongo/edit-note/6818a39bc242e5dec34c6cba
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODE4ODdjZDUyNmE5NmNjZmM3NDQzNmUiLCJpYXQiOjE3NDY0NDUwOTQsImV4cCI6MTc0NjQ1MjI5NH0.jZNx9g85a3FpGr7mhYdng1DgG4KjAgBl6sdHFSsMaaQ
+
+{
+    "title":"Edited Note",
+    "content": "Edited content",
+    "tags": []
+}
+
+### Pin togg;e
+PUT http://localhost:4100/mongo/update-note-pinned/6818ace5dfc991e5511d1517
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODE4ODdjZDUyNmE5NmNjZmM3NDQzNmUiLCJpYXQiOjE3NDY0NDUwOTQsImV4cCI6MTc0NjQ1MjI5NH0.jZNx9g85a3FpGr7mhYdng1DgG4KjAgBl6sdHFSsMaaQ
+
+{
+    "isPinned": true
+}
+
+
+### Get note by ID
+GET http://localhost:4100/mongo/get-note/6818ace5dfc991e5511d1517
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODE4ODdjZDUyNmE5NmNjZmM3NDQzNmUiLCJpYXQiOjE3NDY0NDYxMTIsImV4cCI6MTc0NjQ1MzMxMn0.1ScE1sR3okFjQdvP5Ng6oUuo14OCCwzKd6H-2sbpVv4
