@@ -8,30 +8,28 @@ import mongoose from "mongoose"
 import limiter from "./middleware/rateLimiter.js";
 import errorHandler from "./middleware/errorHandling.js"
 import cookieParser from "cookie-parser";
+import { connectMongo } from "./config/mongo.js";
+import { connectTurso, db } from "./config/torso.js";
 
 
 //User .env file
 dotenv.config()
 
-//app.use(router)
-const app = express()
-app.use(express.json())
-
-
 //PORT from ENV
 const PORT = process.env.PORT
 
 
-const db = createClient({
-    url: process.env.TURSO_DB_URL,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-});
+const app = express();
+
+app.set("trust proxy", 1);
 
 // Global middlewares
 app.use(helmet());
 const corsOptions = {
   origin: ["http://localhost:5173", "https://rag-notes-frontend.vercel.app"], // your frontend domain
   credentials: true, // ✅ allow cookies to be sent
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 };
 
 app.use(cors(corsOptions));
@@ -39,48 +37,72 @@ app.use(limiter);
 app.use(express.json());
 app.use(cookieParser());
 // Centralized routes
+app.use("/", apiRoutes(db));
+app.get("/", (req, res) => {
+  res.send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Notes API</title>
+        <style>
+          body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f7f9fc;
+            color: #333;
+            text-align: center;
+            padding: 50px;
+          }
+          h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+          }
+          p {
+            font-size: 1.2rem;
+            margin-top: 1rem;
+          }
+          code {
+            background: #eee;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.95rem;
+          }
+          .container {
+            max-width: 600px;
+            margin: auto;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>📒 Welcome to the Notes API</h1>
+          <p>This is a simple REST API built with <strong>Express</strong> and <strong>LibSQL</strong>.</p>
+          <p>Try creating a note via <code>POST /notes</code> or explore routes like <code>/users</code> and <code>/notes-with-authors</code>.</p>
+          <p>Use a REST client like <em>VSCode REST Client</em> or <em>Postman</em> to interact.</p>
+          <p>✨ Happy coding!</p>
+        </div>
+      </body>
+      </html>
+    `);
+});
+// Centralized error handling
+app.use(errorHandler);
 
 (async () => {
 // Connect to MongoDB via Mongoose
     try{
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log("Connected to Mongo database ✅");
+        await connectMongo();
+        await connectTurso();
+        app.listen(PORT, () => {
+            console.log(`Server running on http://localhost:${PORT} ✅`)
+        })
+
     } catch (err) {
-        console.error(`MongoDB connection error: ${err}`)
+        console.error("❌ Startup error:", err);
         process.exit(1);
-    }
+      }
 
-    // Ping Turso
-    try {
-        await db.execute("SELECT 1");
-        console.log("Checked successful communication with Turso database ✅");
-    } catch (err) {
-        console.error("❌ Failed to connect to Turso:", err);
-        process.exit(1);
-    }
-
-    //Initialize Turso tables (users, notes)
-
-        await db.execute(`
-            CREATE TABLE IF NOT EXISTS notes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            content TEXT NOT NULL,
-            tags TEXT, --JSON-encode array of strings
-            is_pinned INTEGER DEFAULT 0, -- 0 = false, 1 = true
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            user_ID INTEGER
-            );
-            `)
-
-        await db.execute(`
-            CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL
-            );
-            `)
 
 }
 )()
@@ -88,11 +110,9 @@ app.use(cookieParser());
 
 //   Check if the table already exist? if not create the table as the detail
 
+process.on("unhandledRejection", (err) => {
+    console.error("💥 Unhandled Rejection:", err.message);
+    process.exit(1);
+  });
 
-app.use("/",apiRoutes(db))
 
-app.use(errorHandler)
-
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT} ✅`)
-})

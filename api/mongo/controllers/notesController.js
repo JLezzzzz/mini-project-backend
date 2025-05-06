@@ -1,5 +1,7 @@
 import { Note } from "../../../models/Note.js";
 
+
+
 export const getAllNotes = async (req, res) => {
     try {
         const note = await Note.find().sort({createdAt: -1, isPinned: -1})
@@ -15,7 +17,11 @@ export const getAllNotes = async (req, res) => {
 }
 
 export const createNote = async (req, res) => {
+    console.log(req.body);
     const {title, content, tags =[] ,isPinned = false, userId} = req.body
+    if (!userId) {
+      return res.status(400).json({ error: true, message: "Missing userId" });
+    }
     try{ 
         const note = await Note.create({
             title,
@@ -38,46 +44,56 @@ export const createNote = async (req, res) => {
 }
 
 export const addNote = async (req, res) => {
-    const { title, content, tags = [], isPinned = false } = req.body;
+  console.log("Received add note request:")
+  const { title, content, tags = [], isPinned = false } = req.body;
 
-    const { user } = req.user;
+  const userId = req.user.user._id; // Logged-in user's MongoDB _id
+  console.log("Received add note request:");
+  console.log("Title:", title);
+  console.log("Content:", content);
+  console.log("Tags:", tags);
+  console.log("isPinned:", isPinned);
+  console.log("User ID:", user._id);
 
-    if (!title || !content) {
-      return res.status(400).json({
-        error: true,
-        message: "All fields required!",
-      });
-    }
 
-    if (!user || !user._id) {
-      return res.status(400).json({
-        error: true,
-        message: "Invalid user credentials!",
-      });
-    }
+  if (!title) {
+    return res.status(400).json({ error: true, message: "Title is required" });
+  }
 
-    try {
-      const note = await Note.create({
-        title,
-        content,
-        tags,
-        isPinned,
-        userId: user._id,
-      });
+  if (!content) {
+    return res
+      .status(400)
+      .json({ error: true, message: "Content is required" });
+  }
 
-      await note.save();
-      res.json({
-        error: false,
-        note,
-        message: "Note added successfully!",
-      });
-    } catch (err) {
-      res.status(500).json({
-        error: true,
-        message: "Internal Server Error",
-      });
-    }
-  };
+  if (!userId) {
+    return res
+      .status(401)
+      .json({ error: true, message: "Unauthorized - no user ID found" });
+  }
+
+  try {
+    const note = await Note.create({
+      title,
+      content,
+      tags,
+      isPinned,
+      userId, // 🔥 Save user as ObjectId reference
+    });
+
+    return res.status(201).json({
+      error: false,
+      note,
+      message: "Note added successfully",
+    });
+  } catch (error) {
+    console.error("Error creating note:", error);
+    return res.status(500).json({
+      error: true,
+      message: "Internal Server Error",
+    });
+  }
+};
 
 export const editNote = async (req, res) => {
     const noteId = req.params.noteId;
@@ -143,9 +159,9 @@ export const togglePin = async (req, res) => {
 
 export const getAllNotesByUser = async (req, res) => {
     console.log(req.user)
-    const { user } = req.user;
+    const userId = req.user.user._id
     try {
-      const notes = await Note.find({ userId: user._id }).sort({ isPinned: -1 });
+      const notes = await Note.find({ userId: userId }).sort({ isPinned: -1 });
       return res.json({
         error: false,
         notes,
@@ -246,3 +262,4 @@ export const getNoteById = async (req, res) => {
       });
     }
   };
+

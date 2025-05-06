@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 
 export const authUser = async (req,res,next) => {
+    console.log("Auth middleware hit");
     const token = req.headers.authorization?.split(" ")[1];
     if(!token) {
         return res.json({
@@ -15,7 +16,7 @@ export const authUser = async (req,res,next) => {
 
     } catch (err) {
         const isExpired = err.name === "TokenExpiredError";
-        res.status(401).json({
+        return res.status(401).json({
             error:true,
             code: isExpired ? "TOKEN_EXPIRED" : "INVALID_TOKEN",
             message: isExpired

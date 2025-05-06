@@ -85,18 +85,24 @@ export const registerUser = async (req, res) => {
     try {
         const existingUser = await User.findOne({email})
         if(existingUser) {
-            res.status(409).json({error:true, message: "email already in use"});
+            return res.status(409).json({error:true, message: "email already in use"});
         }
         const user = new User ({fullName, email, password});
         console.log(user)
         await user.save();
-    } catch(err) {
+        return res.status(201).json({
+            error: false,
+            user,
+            message: "User registered successfully"
+        });
+    } catch (err) {
+        console.error("Register Error:", err); // ✅ Add this for debugging
         res.status(500).json({
-            error: true,
-            message: "server error",
-            details: err.message
-        })
-    }
+          error: true,
+          message: "Server error",
+          details: err.message
+        });
+      }
 }
 
 export const login = async (req,res) => {

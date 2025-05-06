@@ -106,3 +106,25 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODE4O
 ### Get note by ID
 GET http://localhost:4100/mongo/get-note/6818ace5dfc991e5511d1517
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODE4ODdjZDUyNmE5NmNjZmM3NDQzNmUiLCJpYXQiOjE3NDY0NDYxMTIsImV4cCI6MTc0NjQ1MzMxMn0.1ScE1sR3okFjQdvP5Ng6oUuo14OCCwzKd6H-2sbpVv4
+
+
+### Login by id
+POST http://localhost:4100/mongo/auth/cookie/login
+Content-Type: application/json
+
+{
+    "email": "user1@fakemail.com",
+    "password": "123456"
+}
+
+### Add note
+POST http://localhost:4100/mongo/add-note
+Content-Type: application/json
+
+{
+    "title": "Note1",
+    "content": "Note1 content",
+    "tags" : ["Tag1", "Tag2"],
+    "isPinned": false
+}
+
